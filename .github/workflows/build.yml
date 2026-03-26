@@ -1,0 +1,89 @@
+name: Universal Android Builder
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-${{ runner.os }}
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Accept Licenses
+        run: yes | sdkmanager --licenses
+
+      - name: Detect SDK version
+        run: |
+          SDK=$(grep -r "compileSdk" . | grep -o '[0-9]\+' | head -n 1)
+          if [ -z "$SDK" ]; then SDK=33; fi
+          echo "SDK=$SDK" >> $GITHUB_ENV
+
+      - name: Install SDK
+        run: |
+          sdkmanager "platform-tools" "platforms;android-$SDK" "build-tools;$SDK.0.0" || true
+
+      - name: Install fallback Gradle
+        run: |
+          wget https://services.gradle.org/distributions/gradle-8.2-bin.zip
+          unzip gradle-8.2-bin.zip
+          echo "$PWD/gradle-8.2/bin" >> $GITHUB_PATH
+
+      - name: Find Project
+        run: |
+          DIR=$(find . -name "settings.gradle" -exec dirname {} \; | head -n 1)
+          if [ -z "$DIR" ]; then echo "No project found"; exit 1; fi
+          echo "DIR=$DIR" >> $GITHUB_ENV
+
+      - name: Build Debug APK
+        run: |
+          cd "$DIR"
+          if [ -f "./gradlew" ]; then
+            chmod +x gradlew
+            ./gradlew assembleDebug --no-daemon
+          else
+            gradle assembleDebug --no-daemon
+          fi
+
+      - name: Build Release APK + AAB
+        run: |
+          cd "$DIR"
+          if [ -f "./gradlew" ]; then
+            ./gradlew assembleRelease bundleRelease --no-daemon || true
+          else
+            gradle assembleRelease bundleRelease --no-daemon || true
+          fi
+
+      - name: Rename outputs
+        run: |
+          for f in $(find . -name "*.apk"); do mv "$f" "built-$(basename $f)"; done
+          for f in $(find . -name "*.aab"); do mv "$f" "built-$(basename $f)"; done
+
+      - name: Upload outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-build
+          path: |
+            **/*.apk
+            **/*.aab
