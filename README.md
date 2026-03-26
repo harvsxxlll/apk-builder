@@ -1,4 +1,4 @@
-#  Universal Android APK Builder
+#  Android APK Builder
 
 Build any Android project directly on GitHub no Android Studio needed.
 
@@ -26,19 +26,19 @@ Build any Android project directly on GitHub no Android Studio needed.
 
 ##  Features
 
-* Auto-detects project
-* Auto-detects SDK version
-* Uses project Gradle if available
-* Builds debug + signed release
-* Generates signing key automatically
+ Auto-detects project
+ Auto-detects SDK version
+ Uses project Gradle if available
+ Builds debug + signed release
+ Generates signing key automatically
 
 ---
 
 ##  Notes
 
-* Works for most Android projects
-* Release key is temporary (new every build)
-* Not ideal for Play Store updates
+ Works for most Android projects
+ Release key is temporary (new every build)
+ Not ideal for Play Store updates
 
 ---
 
