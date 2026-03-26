@@ -1,6 +1,6 @@
 #  Universal Android APK Builder
 
-Build any Android project directly on GitHub — no Android Studio needed.
+Build any Android project directly on GitHub no Android Studio needed.
 
 ---
 
