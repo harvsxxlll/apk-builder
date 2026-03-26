@@ -17,8 +17,8 @@ Build any Android project directly on GitHub no Android Studio needed.
 ##  Output
 
 * built-app-debug.apk
-* built-app-release.apk
-* built-app-release.aab
+* built-app-release.apk (doesnt  always appear)
+* built-app-release.aab (doesnt  always appear)
 
 ---
 
