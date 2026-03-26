@@ -44,7 +44,7 @@ jobs:
         run: |
           sdkmanager "platform-tools" "platforms;android-$SDK" "build-tools;$SDK.0.0" || true
 
-      - name: Install fallback Gradle
+      - name: Install Gradle 8.2 (fallback)
         run: |
           wget https://services.gradle.org/distributions/gradle-8.2-bin.zip
           unzip gradle-8.2-bin.zip
@@ -53,8 +53,22 @@ jobs:
       - name: Find Project
         run: |
           DIR=$(find . -name "settings.gradle" -exec dirname {} \; | head -n 1)
-          if [ -z "$DIR" ]; then echo "No project found"; exit 1; fi
+          if [ -z "$DIR" ]; then echo "❌ No Android project found"; exit 1; fi
           echo "DIR=$DIR" >> $GITHUB_ENV
+          echo "Found project at $DIR"
+
+      - name: Generate Keystore (auto)
+        run: |
+          keytool -genkeypair \
+            -v \
+            -keystore keystore.jks \
+            -alias mykey \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -storepass password123 \
+            -keypass password123 \
+            -dname "CN=User, OU=Dev, O=App, L=London, ST=London, C=GB"
 
       - name: Build Debug APK
         run: |
@@ -66,13 +80,23 @@ jobs:
             gradle assembleDebug --no-daemon
           fi
 
-      - name: Build Release APK + AAB
+      - name: Build Signed Release + AAB
         run: |
           cd "$DIR"
           if [ -f "./gradlew" ]; then
-            ./gradlew assembleRelease bundleRelease --no-daemon || true
+            ./gradlew assembleRelease bundleRelease \
+              -Pandroid.injected.signing.store.file=../../keystore.jks \
+              -Pandroid.injected.signing.store.password=password123 \
+              -Pandroid.injected.signing.key.alias=mykey \
+              -Pandroid.injected.signing.key.password=password123 \
+              --no-daemon || true
           else
-            gradle assembleRelease bundleRelease --no-daemon || true
+            gradle assembleRelease bundleRelease \
+              -Pandroid.injected.signing.store.file=../../keystore.jks \
+              -Pandroid.injected.signing.store.password=password123 \
+              -Pandroid.injected.signing.key.alias=mykey \
+              -Pandroid.injected.signing.key.password=password123 \
+              --no-daemon || true
           fi
 
       - name: Rename outputs
@@ -80,7 +104,7 @@ jobs:
           for f in $(find . -name "*.apk"); do mv "$f" "built-$(basename $f)"; done
           for f in $(find . -name "*.aab"); do mv "$f" "built-$(basename $f)"; done
 
-      - name: Upload outputs
+      - name: Upload files
         uses: actions/upload-artifact@v4
         with:
           name: android-build
