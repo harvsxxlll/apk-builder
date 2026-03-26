@@ -1,34 +1,20 @@
-#  Universal Android Builder
+#  Universal Android APK Builder
 
-Build any Android project directly in GitHub no Android Studio.
+Build any Android project directly on GitHub — no Android Studio needed.
 
 ---
 
 ##  How to use
 
 1. Upload your Android project
-2. Click **Commit**
+2. Click **Commit changes**
 3. Go to **Actions**
 4. Open latest run
 5. Download **android-build**
 
 ---
 
-## Features
-
-* Auto-detect project location
-* Auto-detect SDK version
-* Uses project Gradle if available
-* Fallback Gradle support
-* Builds:
-
-  * Debug APK
-  * Release APK
-  * AAB (Play Store bundle)
-
----
-
-## Output files
+##  Output
 
 * built-app-debug.apk
 * built-app-release.apk
@@ -36,11 +22,21 @@ Build any Android project directly in GitHub no Android Studio.
 
 ---
 
-## Notes
+##  Features
+
+* Auto-detects project
+* Auto-detects SDK version
+* Uses project Gradle if available
+* Builds debug + signed release
+* Generates signing key automatically
+
+---
+
+##  Notes
 
 * Works for most Android projects
-* Some projects may require fixes
-* Release builds may need signing
+* Release key is temporary (new every build)
+* Not ideal for Play Store updates
 
 ---
 
