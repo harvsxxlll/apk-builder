@@ -10,7 +10,9 @@ Build any Android project directly on GitHub no Android Studio needed.
 2. Click **Commit changes**
 3. Go to **Actions**
 4. Open latest run
-5. Download **android-build**
+5. Scroll down a bit and look for Artifacts
+6. Download the ZIP file and extract
+7. Go inside the extracted ZIP and your files will be there.
 
 ---
 
